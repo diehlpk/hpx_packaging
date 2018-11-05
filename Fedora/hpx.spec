@@ -9,6 +9,7 @@ URL:            http://stellar.cct.lsu.edu/tag/hpx/
 Source0:        https://github.com/STEllAR-GROUP/%{name}/archive/%{uversion}.tar.gz#/%{name}-%{uversion}.tar.gz
 #hpx has no support for 
 ExcludeArch: s390x
+ExcludeArch: armv7hl
 
 BuildRequires:  gcc-c++ >= 4.9
 BuildRequires:  gperftools-devel
@@ -148,6 +149,9 @@ rm -rf %{buildroot}/%{_datadir}/%{name}-*/docs/html/code
 %license LICENSE_1_0.txt
 %{_libdir}/openmpi*/lib/lib*.so.*
 %{_libdir}/openmpi*/lib/%{name}
+
+
+%files opemmpi-examples
 %{_libdir}/openmpi*/bin/*
 
 %files mpich
