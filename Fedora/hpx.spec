@@ -7,6 +7,8 @@ License:        BSL-1.0
 URL:            http://stellar.cct.lsu.edu/tag/hpx/
 #Source0:        http://stellar.cct.lsu.edu/files/{name}_{uversion}.tar.gz
 Source0:        https://github.com/STEllAR-GROUP/%{name}/archive/%{uversion}.tar.gz#/%{name}-%{uversion}.tar.gz
+#hpx has no support for 
+ExcludeArch: s390x
 
 BuildRequires:  gcc-c++ >= 4.9
 BuildRequires:  gperftools-devel
@@ -92,7 +94,7 @@ HPX compiled with Open MPI, package incl. binaries and libraries
 %setup -n %{name}-%{uversion} -q
 
 %build
-%ifarch aarch64 s390x
+%ifarch aarch64 s390x armv7hl
 %define cmake_opts -DHPX_WITH_GENERIC_CONTEXT_COROUTINES=ON
 %endif
 
@@ -151,9 +153,9 @@ rm -rf %{buildroot}/%{_datadir}/%{name}-*/docs/html/code
 %files mpich
 %doc README.rst
 %license LICENSE_1_0.txt
-%{_libdir}/openmpi*/lib/lib*.so.*
-%{_libdir}/openmpi*/lib/%{name}
-%{_libdir}/openmpi*/bin/*
+%{_libdir}/mpich*/lib/lib*.so.*
+%{_libdir}/mpich*/lib/%{name}
+%{_libdir}/mpich*/bin/*
 
 %files devel
 %{_includedir}/%{name}
