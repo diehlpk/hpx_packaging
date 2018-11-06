@@ -186,14 +186,14 @@ popd
 %make_install -C serial 
 sed -i '1s@env python@python2@' %{buildroot}/%{_bindir}/{hpx*.py,hpxcxx}  %{buildroot}%{_libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
 chmod +x  %{buildroot}%{_libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
-cd  %{buildroot}/%{_bindir} && rename '' hpx_ * && cd .. 
+for f in  %{buildroot}/%{_bindir}/* ; do mv $(dirname $f)/$(basename $f) $(dirname $f)/hpx_$(basename $f) ; done
 %{_openmpi_load}
 %make_install -C openmpi
 mkdir %{buildroot}/${MPI_BIN}
 mv %{buildroot}/%{_bindir}/* %{buildroot}/${MPI_BIN}/
 sed -i '1s@env python@python2@' %{buildroot}/${MPI_BIN}/{hpx*.py,hpxcxx} %{buildroot}/${MPI_LIB}/cmake/HPX/templates/hpx{cxx,run.py}.in
 chmod +x %{buildroot}/${MPI_LIB}/cmake/HPX/templates/hpx{cxx,run.py}.in
-cd %{buildroot}/${MPI_BIN}/ && rename '' hpx_ * && cd .. 
+for f in %{buildroot}/${MPI_BIN}/* ; do mv $(dirname $f)/$(basename $f) $(dirname $f)/hpx_$(basename $f) ; done
 %{_openmpi_unload}
 %{_mpich_load}
 %make_install -C mpich
@@ -201,7 +201,7 @@ mkdir %{buildroot}/${MPI_BIN}
 mv %{buildroot}/%{_bindir}/* %{buildroot}/${MPI_BIN}/
 sed -i '1s@env python@python2@' %{buildroot}/${MPI_BIN}/{hpx*.py,hpxcxx} %{buildroot}/${MPI_LIB}/cmake/HPX/templates/hpx{cxx,run.py}.in
 chmod +x %{buildroot}/${MPI_LIB}/cmake/HPX/templates/hpx{cxx,run.py}.in
-cd %{buildroot}/${MPI_BIN}/ && rename '' hpx_ * && cd .. 
+for f in %{buildroot}/${MPI_BIN}/* ; do mv $(dirname $f)/$(basename $f) $(dirname $f)/hpx_$(basename $f) ; done
 %{_mpich_unload}
 
 rm %{buildroot}/%{_datadir}/%{name}-*/LICENSE_1_0.txt
@@ -210,12 +210,12 @@ rm -rf %{buildroot}/%{_datadir}/%{name}-*/docs/html/code
 
 # check currently needs too much memory, re-enable in next version
 #%check
-make -C serial tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
-%{_openmpi_load}
-make -C openmpi tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
+#make -C serial tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
+#%{_openmpi_load}
+#make -C openmpi tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
 #%{_openmpi_unload}
 #%{_mpich_load}
-make -C mpich tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
+#make -C mpich tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
 #%{_mpich_unload}
 
 %files
@@ -227,7 +227,7 @@ make -C mpich tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
 %files examples
 %doc README.rst
 %license LICENSE_1_0.txt
-%{_libdir}/bin/*
+%{_bindir}/*
 
 %files openmpi
 %doc README.rst
