@@ -209,14 +209,14 @@ rm -rf %{buildroot}/%{_datadir}/%{name}-*/docs/html/code
 %fdupes %{buildroot}%{_prefix}
 
 # check currently needs too much memory, re-enable in next version
-#%check
-#make -C serial tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
-#%{_openmpi_load}
-#make -C openmpi tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
-#%{_openmpi_unload}
-#%{_mpich_load}
-#make -C mpich tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
-#%{_mpich_unload}
+%check
+make -C serial tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
+%{_openmpi_load}
+make -C openmpi tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
+%{_openmpi_unload}
+%{_mpich_load}
+make -C mpich tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
+%{_mpich_unload}
 
 %files
 %doc README.rst
