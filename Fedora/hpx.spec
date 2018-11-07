@@ -162,7 +162,7 @@ HPX compiled with Open MPI, package incl. examples
 %endif
 
 . /etc/profile.d/modules.sh
-for mpi in '' openmpi mpich
+for mpi in '' openmpi mpich ; do
   test -n "${mpi}" && module load mpi/${mpi}-%{_arch}
   mkdir -p ${mpi:-serial}
   pushd ${mpi:-serial}
@@ -175,7 +175,7 @@ done
 %install
 # do serial install last due to move of executables to _bindir
 . /etc/profile.d/modules.sh
-for mpi in openmpi mpich ''
+for mpi in openmpi mpich '' ; do
   test -n "${mpi}" && module load mpi/${mpi}-%{_arch} && mkdir -p %{buildroot}/${MPI_BIN}
   %make_install -C ${mpi:-serial}
   sed -i '1s@env python@python2@' %{buildroot}/%{_bindir}/{hpx*.py,hpxcxx}  %{buildroot}%{_libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
@@ -195,9 +195,9 @@ rm -rf %{buildroot}/%{_datadir}/%{name}-*/docs/html/code
 # check currently needs too much memory, re-enable in next version
 %check
 . /etc/profile.d/modules.sh
-for mpi in '' openmpi mpich
+for mpi in '' openmpi mpich ; do
   test -n "${mpi}" && module load mpi/${mpi}-%{_arch}
-  make -C ${mpi:-serial} tests.units
+  make -C ${mpi:-serial} tests.examples
   test -n "${mpi}" && module unload mpi/${mpi}-%{_arch}
 done
 
