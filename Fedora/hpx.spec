@@ -161,48 +161,30 @@ HPX compiled with Open MPI, package incl. examples
 %define cmake_opts -DHPX_WITH_GENERIC_CONTEXT_COROUTINES=ON
 %endif
 
-mkdir openmpi mpich serial
-
-pushd serial
-%{cmake} -DLIB=%{_lib} %{?cmake_opts:%{cmake_opts}} ..
-%make_build
-popd
-
-pushd openmpi
-%{_openmpi_load}
-%{cmake} -DLIB=${MPI_LIB} %{?cmake_opts:%{cmake_opts}} ..
-%make_build
-%{_openmpi_unload}
-popd
-
-pushd mpich
-%{_mpich_load}
-%{cmake} -DLIB=${MPI_LIB} %{?cmake_opts:%{cmake_opts}} ..
-%make_build
-%{_mpich_unload}
-popd
+for mpi in '' openmpi mpich
+  test -n "${mpi}" && module load mpi/${mpi}-%{_arch}
+  mkdir -p ${mpi:-serial}
+  pushd ${mpi:-serial}
+  %{cmake} -DLIB=%{_lib} %{?cmake_opts:%{cmake_opts}} ..
+  %make_build
+  popd
+  test -n "${mpi}" && module unload mpi/${mpi}-%{_arch}
+done
 
 %install
-%make_install -C serial 
-sed -i '1s@env python@python2@' %{buildroot}/%{_bindir}/{hpx*.py,hpxcxx}  %{buildroot}%{_libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
-chmod +x  %{buildroot}%{_libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
-for f in  %{buildroot}/%{_bindir}/* ; do mv $(dirname $f)/$(basename $f) $(dirname $f)/hpx_$(basename $f) ; done
-%{_openmpi_load}
-%make_install -C openmpi
-mkdir %{buildroot}/${MPI_BIN}
-mv %{buildroot}/%{_bindir}/* %{buildroot}/${MPI_BIN}/
-sed -i '1s@env python@python2@' %{buildroot}/${MPI_BIN}/{hpx*.py,hpxcxx} %{buildroot}/${MPI_LIB}/cmake/HPX/templates/hpx{cxx,run.py}.in
-chmod +x %{buildroot}/${MPI_LIB}/cmake/HPX/templates/hpx{cxx,run.py}.in
-for f in %{buildroot}/${MPI_BIN}/* ; do mv $(dirname $f)/$(basename $f) $(dirname $f)/hpx_$(basename $f) ; done
-%{_openmpi_unload}
-%{_mpich_load}
-%make_install -C mpich
-mkdir %{buildroot}/${MPI_BIN}
-mv %{buildroot}/%{_bindir}/* %{buildroot}/${MPI_BIN}/
-sed -i '1s@env python@python2@' %{buildroot}/${MPI_BIN}/{hpx*.py,hpxcxx} %{buildroot}/${MPI_LIB}/cmake/HPX/templates/hpx{cxx,run.py}.in
-chmod +x %{buildroot}/${MPI_LIB}/cmake/HPX/templates/hpx{cxx,run.py}.in
-for f in %{buildroot}/${MPI_BIN}/* ; do mv $(dirname $f)/$(basename $f) $(dirname $f)/hpx_$(basename $f) ; done
-%{_mpich_unload}
+# do serial install last due to move of executables to _bindir
+for mpi in openmpi mpich ''
+  test -n "${mpi}" && module load mpi/${mpi}-%{_arch} && mkdir -p %{buildroot}/${MPI_BIN}
+  %make_install -C ${mpi:-serial}
+  sed -i '1s@env python@python2@' %{buildroot}/%{_bindir}/{hpx*.py,hpxcxx}  %{buildroot}%{_libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
+  chmod +x  %{buildroot}%{_libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
+  pushd %{buildroot}/%{_bindir}
+  for exe in  *; do 
+    test -n '${exe##hpx*}' && mv "${exe}" "hpx_${exe}"
+  done
+  popd
+  test -n "${mpi}" && module unload mpi/${mpi}-%{_arch} && mv %{buildroot}/%{_bindir}/* %{buildroot}/${MPI_BIN}/
+done
 
 rm %{buildroot}/%{_datadir}/%{name}-*/LICENSE_1_0.txt
 rm -rf %{buildroot}/%{_datadir}/%{name}-*/docs/html/code
@@ -210,13 +192,11 @@ rm -rf %{buildroot}/%{_datadir}/%{name}-*/docs/html/code
 
 # check currently needs too much memory, re-enable in next version
 %check
-make -C serial tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
-%{_openmpi_load}
-make -C openmpi tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
-%{_openmpi_unload}
-%{_mpich_load}
-make -C mpich tests CTEST_OUTPUT_ON_FAILURE=1 -R tests.unit
-%{_mpich_unload}
+for mpi in '' openmpi mpich
+  test -n "${mpi}" && module load mpi/${mpi}-%{_arch}
+  make -C ${mpi:-serial} tests.units
+  test -n "${mpi}" && module unload mpi/${mpi}-%{_arch}
+done
 
 %files
 %doc README.rst
