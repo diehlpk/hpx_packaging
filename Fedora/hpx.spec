@@ -111,6 +111,27 @@ libraries.
 
 HPX compiled with MPICH, package incl. examples
 
+%package mpich-devel
+Summary:    Development headers and libraries for hpx
+Group:      Development/Libraries/C and C++
+Requires:   hpx-mpich = %{version}-%{release}
+
+%description mpich-devel
+HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale.
+
+The goal of HPX is to create a high quality, freely available, open source implementation of the 
+ParalleX model for conventional systems, such as classic Linux based Beowulf clusters or multi-socket
+highly parallel SMP nodes. At the same time, we want to have a very modular and well designed runtime
+system architecture which would allow us to port our implementation onto new computer system
+architectures. We want to use real world applications to drive the development of the runtime system,
+coining out required functionalities and converging onto a stable API which will provide a smooth
+migration path for developers. The API exposed by HPX is modelled after the interfaces defined by the
+C++11 ISO standard and adheres to the programming guidelines used by the Boost collection of C++
+libraries.
+
+This package contains development headers
+
+
 %package openmpi
 Summary:        HPX Open MPI libraries
 Requires:       openmpi
@@ -153,6 +174,28 @@ libraries.
 HPX compiled with Open MPI, package incl. examples
 
 
+%package openmpi-devel
+Summary:    Development headers and libraries for hpx
+Group:      Development/Libraries/C and C++
+Requires:   hpx-openmpi = %{version}-%{release}
+
+%description openmpi-devel
+HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale.
+
+The goal of HPX is to create a high quality, freely available, open source implementation of the 
+ParalleX model for conventional systems, such as classic Linux based Beowulf clusters or multi-socket
+highly parallel SMP nodes. At the same time, we want to have a very modular and well designed runtime
+system architecture which would allow us to port our implementation onto new computer system
+architectures. We want to use real world applications to drive the development of the runtime system,
+coining out required functionalities and converging onto a stable API which will provide a smooth
+migration path for developers. The API exposed by HPX is modelled after the interfaces defined by the
+C++11 ISO standard and adheres to the programming guidelines used by the Boost collection of C++
+libraries.
+
+This package contains development headers for hpx
+
+
+
 %prep
 %setup -n %{name}-%{uversion} -q
 
@@ -165,9 +208,17 @@ HPX compiled with Open MPI, package incl. examples
 for mpi in '' openmpi mpich ; do
   test -n "${mpi}" && module load mpi/${mpi}-%{_arch}
   mkdir -p ${mpi:-serial}
-  pushd ${mpi:-serial}
+  pushd ${s:-.}/${mpi:-serial}
+  if [ -n "$mpi" ]; then
+  export CC=mpicc
+  export CXX=mpicxx
+  %{cmake} -DHPX_WITH_PARCELPORT_MPI=0N -DLIB=${MPI_LIB} %{?cmake_opts:%{cmake_opts}} ..
+  else
+  export CC=gcc
+  export CXX=g++
   %{cmake} -DLIB=%{_lib} %{?cmake_opts:%{cmake_opts}} ..
-  %make_build
+  fi
+  %make_build 
   popd
   test -n "${mpi}" && module unload mpi/${mpi}-%{_arch}
 done
@@ -177,22 +228,29 @@ done
 . /etc/profile.d/modules.sh
 for mpi in openmpi mpich '' ; do
   test -n "${mpi}" && module load mpi/${mpi}-%{_arch} && mkdir -p %{buildroot}/${MPI_BIN}
-  %make_install -C ${mpi:-serial}
-  sed -i '1s@env python@python2@' %{buildroot}/%{_bindir}/{hpx*.py,hpxcxx}  %{buildroot}%{_libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
-  chmod +x  %{buildroot}%{_libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
+  pushd ${s:-.}/${mpi:-serial}
+  %make_install
+  if [ -n "$mpi" ]; then
+  libdir=%{_libdir}/${mpi}/lib
+  else
+  libdir=%{_libdir}
+  fi
+  sed -i '1s@env python@python2@' %{buildroot}/%{_bindir}/{hpx*.py,hpxcxx}  %{buildroot}${libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
+  chmod +x  %{buildroot}${libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
+  popd
   pushd %{buildroot}/%{_bindir}
   for exe in  *; do 
     test -n '${exe##hpx*}' && mv "${exe}" "hpx_${exe}"
   done
   popd
-  test -n "${mpi}" && module unload mpi/${mpi}-%{_arch} && mv %{buildroot}/%{_bindir}/* %{buildroot}/${MPI_BIN}/
+  test -n "${mpi}" && mv %{buildroot}/%{_bindir}/* %{buildroot}/${MPI_BIN}/
+  test -n "${mpi}" && module unload mpi/${mpi}-%{_arch} 
 done
 
 rm %{buildroot}/%{_datadir}/%{name}-*/LICENSE_1_0.txt
 rm -rf %{buildroot}/%{_datadir}/%{name}-*/docs/html/code
 %fdupes %{buildroot}%{_prefix}
 
-# check currently needs too much memory, re-enable in next version
 %check
 . /etc/profile.d/modules.sh
 for mpi in '' openmpi mpich ; do
@@ -201,11 +259,24 @@ for mpi in '' openmpi mpich ; do
   test -n "${mpi}" && module unload mpi/${mpi}-%{_arch}
 done
 
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
+
+%post mpich -p /sbin/ldconfig
+
+%postun mpich -p /sbin/ldconfig
+
+%post openmpi -p /sbin/ldconfig
+
+%postun openmpi -p /sbin/ldconfig
+
 %files
 %doc README.rst
 %license LICENSE_1_0.txt
 %{_libdir}/%{name}/
-%{_libdir}/lib*.so.*
+%{_libdir}/lib*.so*
+%{_libdir}/lib*.a
 
 %files examples
 %doc README.rst
@@ -215,34 +286,45 @@ done
 %files openmpi
 %doc README.rst
 %license LICENSE_1_0.txt
-%{_libdir}/openmpi*/lib/lib*.so.*
+%{_libdir}/openmpi*/lib/lib*.so*
 %{_libdir}/openmpi*/lib/%{name}
+%{_libdir}/openmpi*/lib/lib*.a
 
 %files openmpi-examples
 %doc README.rst
 %license LICENSE_1_0.txt
 %{_libdir}/openmpi*/bin/*
 
+%files openmpi-devel
+%{_includedir}/%{name}
+%{_libdir}/openmpi*/lib/pkgconfig/*.pc
+%{_libdir}/openmpi*/lib/cmake/HPX
+%{_libdir}/openmpi*/lib/bazel
 
 %files mpich
 %doc README.rst
 %license LICENSE_1_0.txt
-%{_libdir}/mpich*/lib/lib*.so.*
+%{_libdir}/mpich*/lib/lib*.so*
 %{_libdir}/mpich*/lib/%{name}
+%{_libdir}/mpich*/lib/lib*.a
 
 %files mpich-examples
 %doc README.rst
 %license LICENSE_1_0.txt
 %{_libdir}/mpich*/bin/*
 
+%files mpich-devel
+%{_includedir}/%{name}
+%{_libdir}/mpich*/lib/pkgconfig/*.pc
+%{_libdir}/mpich*/lib/cmake/HPX
+%{_libdir}/mpich*/lib/bazel
+
 %files devel
 %{_includedir}/%{name}
-%{_libdir}/*mpi*/lib/lib*.so
-%{_libdir}/*mpi*/lib/%{name}/lib*.so
-%{_libdir}/*mpi*/lib/lib*.a
-%{_libdir}/*mpi*/lib/pkgconfig/*.pc
-%{_libdir}/*mpi*/lib/cmake/HPX
-%{_libdir}/*mpi*/lib/bazel
-%{_datadir}/%{name}-*
+%{_libdir}/pkgconfig/*.pc
+%{_libdir}/cmake/HPX
+%{_libdir}/bazel
 
 %changelog
+* Fri Nov 09 2018 Patrick Diehl <patrickdiehl@lsu.edu> - 1.2-0
+- Initial Release of HPX 1.2
