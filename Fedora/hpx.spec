@@ -228,13 +228,8 @@ for mpi in openmpi mpich '' ; do
   test -n "${mpi}" && module load mpi/${mpi}-%{_arch} && mkdir -p %{buildroot}/${MPI_BIN}
   pushd ${s:-.}/${mpi:-serial}
   %make_install
-  if [ -n "$mpi" ]; then
-  libdir=${MPI_LIB}
-  else
-  libdir=%{_libdir}
-  fi
-  sed -i '1s@env python@python2@' %{buildroot}/%{_bindir}/{hpx*.py,hpxcxx}  %{buildroot}${libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
-  chmod +x  %{buildroot}${libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
+  sed -i '1s@env python@python2@' %{buildroot}/%{_bindir}/{hpx*.py,hpxcxx}  %{buildroot}${MPI_LIB:-%{_libdir}}/cmake/HPX/templates/hpx{cxx,run.py}.in
+  chmod +x  %{buildroot}${MPI_LIB:-%{_libdir}}/cmake/HPX/templates/hpx{cxx,run.py}.in
   popd
   pushd %{buildroot}/%{_bindir}
   for exe in  *; do 
