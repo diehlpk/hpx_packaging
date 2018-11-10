@@ -208,7 +208,7 @@ for mpi in '' openmpi mpich ; do
   mkdir -p ${mpi:-serial}
   pushd ${mpi:-serial}
   test -n "${mpi}" && export CC=mpicc && export CXX=mpicxx
-  %{cmake} ${mpi:+-DHPX_WITH_PARCELPORT_MPI=0N} -DLIB=${MPI_LIB:-%{_lib}} %{?cmake_opts:%{cmake_opts}} ..
+  %{cmake} ${mpi:+-DHPX_WITH_PARCELPORT_MPI=ON} -DLIB=${MPI_LIB:-%{_lib}} %{?cmake_opts:%{cmake_opts}} ..
   %make_build 
   test -n "${mpi}" && unset CC CXX
   popd
