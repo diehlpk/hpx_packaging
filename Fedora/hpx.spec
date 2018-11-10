@@ -18,9 +18,10 @@ BuildRequires:  hwloc-devel
 BuildRequires:  cmake
 BuildRequires:  fdupes
 
-%description
-HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale.
 
+%global hpx_desc \
+HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale. \
+\
 The goal of HPX is to create a high quality, freely available, open source implementation of the 
 ParalleX model for conventional systems, such as classic Linux based Beowulf clusters or multi-socket
 highly parallel SMP nodes. At the same time, we want to have a very modular and well designed runtime
@@ -30,25 +31,20 @@ coining out required functionalities and converging onto a stable API which will
 migration path for developers. The API exposed by HPX is modelled after the interfaces defined by the
 C++11 ISO standard and adheres to the programming guidelines used by the Boost collection of C++
 libraries.
+
+%description
+%{hpx_desc}
+
+This package contains the libraries
 
 %package examples
 Summary: HPX examples
 Requires:       hpx = %{version}-%{release}
 
 %description examples
-HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale.
+%{hpx_desc}
 
-The goal of HPX is to create a high quality, freely available, open source implementation of the 
-ParalleX model for conventional systems, such as classic Linux based Beowulf clusters or multi-socket
-highly parallel SMP nodes. At the same time, we want to have a very modular and well designed runtime
-system architecture which would allow us to port our implementation onto new computer system
-architectures. We want to use real world applications to drive the development of the runtime system,
-coining out required functionalities and converging onto a stable API which will provide a smooth
-migration path for developers. The API exposed by HPX is modelled after the interfaces defined by the
-C++11 ISO standard and adheres to the programming guidelines used by the Boost collection of C++
-libraries.
-
-HPX compiled with gcc, package incl. examples
+This package contains the examples
 
 %package devel
 Summary:    Development headers and libraries for hpx
@@ -56,19 +52,9 @@ Group:      Development/Libraries/C and C++
 Requires:   hpx = %{version}-%{release}
 
 %description devel
-HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale.
+%{hpx_desc}
 
-The goal of HPX is to create a high quality, freely available, open source implementation of the 
-ParalleX model for conventional systems, such as classic Linux based Beowulf clusters or multi-socket
-highly parallel SMP nodes. At the same time, we want to have a very modular and well designed runtime
-system architecture which would allow us to port our implementation onto new computer system
-architectures. We want to use real world applications to drive the development of the runtime system,
-coining out required functionalities and converging onto a stable API which will provide a smooth
-migration path for developers. The API exposed by HPX is modelled after the interfaces defined by the
-C++11 ISO standard and adheres to the programming guidelines used by the Boost collection of C++
-libraries.
-
-This package contains development headers and libraries for hpx
+This package contains development headers and libraries
 
 %package mpich
 Summary:        HPX MPICH libraries
@@ -76,19 +62,9 @@ Requires:       mpich
 BuildRequires:  mpich-devel
 
 %description mpich
-HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale.
+%{hpx_desc}
 
-The goal of HPX is to create a high quality, freely available, open source implementation of the 
-ParalleX model for conventional systems, such as classic Linux based Beowulf clusters or multi-socket
-highly parallel SMP nodes. At the same time, we want to have a very modular and well designed runtime
-system architecture which would allow us to port our implementation onto new computer system
-architectures. We want to use real world applications to drive the development of the runtime system,
-coining out required functionalities and converging onto a stable API which will provide a smooth
-migration path for developers. The API exposed by HPX is modelled after the interfaces defined by the
-C++11 ISO standard and adheres to the programming guidelines used by the Boost collection of C++
-libraries.
-
-HPX compiled with MPICH, package incl. libraries
+This package contains the libraries
 
 %package mpich-examples
 Summary: HPX MPICH examples
@@ -97,19 +73,9 @@ Requires:       hpx-mpich = %{version}-%{release}
 BuildRequires:  mpich-devel
 
 %description mpich-examples
-HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale.
+%{hpx_desc}
 
-The goal of HPX is to create a high quality, freely available, open source implementation of the 
-ParalleX model for conventional systems, such as classic Linux based Beowulf clusters or multi-socket
-highly parallel SMP nodes. At the same time, we want to have a very modular and well designed runtime
-system architecture which would allow us to port our implementation onto new computer system
-architectures. We want to use real world applications to drive the development of the runtime system,
-coining out required functionalities and converging onto a stable API which will provide a smooth
-migration path for developers. The API exposed by HPX is modelled after the interfaces defined by the
-C++11 ISO standard and adheres to the programming guidelines used by the Boost collection of C++
-libraries.
-
-HPX compiled with MPICH, package incl. examples
+This package contains the examples
 
 %package mpich-devel
 Summary:    Development headers and libraries for hpx
@@ -117,19 +83,9 @@ Group:      Development/Libraries/C and C++
 Requires:   hpx-mpich = %{version}-%{release}
 
 %description mpich-devel
-HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale.
+%{hpx_desc}.
 
-The goal of HPX is to create a high quality, freely available, open source implementation of the 
-ParalleX model for conventional systems, such as classic Linux based Beowulf clusters or multi-socket
-highly parallel SMP nodes. At the same time, we want to have a very modular and well designed runtime
-system architecture which would allow us to port our implementation onto new computer system
-architectures. We want to use real world applications to drive the development of the runtime system,
-coining out required functionalities and converging onto a stable API which will provide a smooth
-migration path for developers. The API exposed by HPX is modelled after the interfaces defined by the
-C++11 ISO standard and adheres to the programming guidelines used by the Boost collection of C++
-libraries.
-
-This package contains development headers
+This package contains development headers and libraries
 
 
 %package openmpi
@@ -138,19 +94,9 @@ Requires:       openmpi
 BuildRequires:  openmpi-devel
 
 %description openmpi
-HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale.
+%{hpx_desc}
 
-The goal of HPX is to create a high quality, freely available, open source implementation of the 
-ParalleX model for conventional systems, such as classic Linux based Beowulf clusters or multi-socket
-highly parallel SMP nodes. At the same time, we want to have a very modular and well designed runtime
-system architecture which would allow us to port our implementation onto new computer system
-architectures. We want to use real world applications to drive the development of the runtime system,
-coining out required functionalities and converging onto a stable API which will provide a smooth
-migration path for developers. The API exposed by HPX is modelled after the interfaces defined by the
-C++11 ISO standard and adheres to the programming guidelines used by the Boost collection of C++
-libraries.
-
-HPX compiled with Open MPI, package incl. libraries
+This package contains the libraries
 
 %package openmpi-examples
 Summary: HPX Open MPI examples
@@ -159,19 +105,9 @@ Requires:       hpx-openmpi = %{version}-%{release}
 BuildRequires:  openmpi-devel
 
 %description openmpi-examples
-HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale.
+%{hpx_desc}.
 
-The goal of HPX is to create a high quality, freely available, open source implementation of the 
-ParalleX model for conventional systems, such as classic Linux based Beowulf clusters or multi-socket
-highly parallel SMP nodes. At the same time, we want to have a very modular and well designed runtime
-system architecture which would allow us to port our implementation onto new computer system
-architectures. We want to use real world applications to drive the development of the runtime system,
-coining out required functionalities and converging onto a stable API which will provide a smooth
-migration path for developers. The API exposed by HPX is modelled after the interfaces defined by the
-C++11 ISO standard and adheres to the programming guidelines used by the Boost collection of C++
-libraries.
-
-HPX compiled with Open MPI, package incl. examples
+This package contains the examples
 
 
 %package openmpi-devel
@@ -180,19 +116,9 @@ Group:      Development/Libraries/C and C++
 Requires:   hpx-openmpi = %{version}-%{release}
 
 %description openmpi-devel
-HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale.
+%{hpx_desc}
 
-The goal of HPX is to create a high quality, freely available, open source implementation of the 
-ParalleX model for conventional systems, such as classic Linux based Beowulf clusters or multi-socket
-highly parallel SMP nodes. At the same time, we want to have a very modular and well designed runtime
-system architecture which would allow us to port our implementation onto new computer system
-architectures. We want to use real world applications to drive the development of the runtime system,
-coining out required functionalities and converging onto a stable API which will provide a smooth
-migration path for developers. The API exposed by HPX is modelled after the interfaces defined by the
-C++11 ISO standard and adheres to the programming guidelines used by the Boost collection of C++
-libraries.
-
-This package contains development headers for hpx
+This package contains development headers and libraries
 
 %prep
 %setup -n %{name}-%{uversion} -q
