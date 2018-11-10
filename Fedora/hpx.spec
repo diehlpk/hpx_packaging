@@ -3,7 +3,7 @@ Version:        1.2.0
 %global uversion 1.2.0-rc1
 Release:        0.1.rc1
 Summary:        General Purpose C++ Runtime System
-License:        BSL-1.0
+License:        Boost
 URL:            http://stellar.cct.lsu.edu/tag/hpx/
 #Source0:        http://stellar.cct.lsu.edu/files/{name}_{uversion}.tar.gz
 Source0:        https://github.com/STEllAR-GROUP/%{name}/archive/%{uversion}.tar.gz#/%{name}-%{uversion}.tar.gz
@@ -20,17 +20,20 @@ BuildRequires:  fdupes
 
 
 %global hpx_desc \
-HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale. \
+HPX is a general purpose C++ runtime system for parallel and distributed \
+applications of any scale. \
 \
-The goal of HPX is to create a high quality, freely available, open source implementation of the 
-ParalleX model for conventional systems, such as classic Linux based Beowulf clusters or multi-socket
-highly parallel SMP nodes. At the same time, we want to have a very modular and well designed runtime
-system architecture which would allow us to port our implementation onto new computer system
-architectures. We want to use real world applications to drive the development of the runtime system,
-coining out required functionalities and converging onto a stable API which will provide a smooth
-migration path for developers. The API exposed by HPX is modelled after the interfaces defined by the
-C++11 ISO standard and adheres to the programming guidelines used by the Boost collection of C++
-libraries.
+The goal of HPX is to create a high quality, freely available, \
+open source implementation of the ParalleX model for conventional systems, \
+such as classic Linux based Beowulf clusters or multi-socket highly parallel \
+SMP nodes. At the same time, we want to have a very modular and well designed \
+runtime system architecture which would allow us to port our implementation \
+onto new computer system architectures. We want to use real world applications\
+to drive the development of the runtime system, coining out required \
+functionality and converging onto a stable API which will provide a smooth \
+migration path for developers. The API exposed by HPX is modeled after the \
+interfaces defined by the C++11 ISO standard and adheres to the \
+programming guidelines used by the Boost collection of C++ libraries.
 
 %description
 %{hpx_desc}
