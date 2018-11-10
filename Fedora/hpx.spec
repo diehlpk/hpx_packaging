@@ -206,7 +206,7 @@ This package contains development headers for hpx
 for mpi in '' openmpi mpich ; do
   test -n "${mpi}" && module load mpi/${mpi}-%{_arch}
   mkdir -p ${mpi:-serial}
-  pushd ${s:-.}/${mpi:-serial}
+  pushd ${mpi:-serial}
   if [ -n "$mpi" ]; then
   export CC=mpicc
   export CXX=mpicxx
@@ -226,7 +226,7 @@ done
 . /etc/profile.d/modules.sh
 for mpi in openmpi mpich '' ; do
   test -n "${mpi}" && module load mpi/${mpi}-%{_arch} && mkdir -p %{buildroot}/${MPI_BIN}
-  pushd ${s:-.}/${mpi:-serial}
+  pushd ${mpi:-serial}
   %make_install
   sed -i '1s@env python@python2@' %{buildroot}/%{_bindir}/{hpx*.py,hpxcxx}  %{buildroot}${MPI_LIB:-%{_libdir}}/cmake/HPX/templates/hpx{cxx,run.py}.in
   chmod +x  %{buildroot}${MPI_LIB:-%{_libdir}}/cmake/HPX/templates/hpx{cxx,run.py}.in
