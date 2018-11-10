@@ -231,7 +231,7 @@ for mpi in openmpi mpich '' ; do
   pushd ${s:-.}/${mpi:-serial}
   %make_install
   if [ -n "$mpi" ]; then
-  libdir=%{_libdir}/${mpi}/lib
+  libdir=${MPI_LIB}
   else
   libdir=%{_libdir}
   fi
