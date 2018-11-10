@@ -194,8 +194,6 @@ libraries.
 
 This package contains development headers for hpx
 
-
-
 %prep
 %setup -n %{name}-%{uversion} -q
 
@@ -275,7 +273,7 @@ done
 %doc README.rst
 %license LICENSE_1_0.txt
 %{_libdir}/%{name}/
-%{_libdir}/lib*.so*
+%{_libdir}/lib*.so.*
 
 %files examples
 %doc README.rst
@@ -285,7 +283,7 @@ done
 %files openmpi
 %doc README.rst
 %license LICENSE_1_0.txt
-%{_libdir}/openmpi*/lib/lib*.so*
+%{_libdir}/openmpi*/lib/lib*.so.*
 %{_libdir}/openmpi*/lib/%{name}
 
 %files openmpi-examples
@@ -299,11 +297,12 @@ done
 %{_libdir}/openmpi*/lib/cmake/HPX
 %{_libdir}/openmpi*/lib/bazel
 %{_libdir}/openmpi*/lib/lib*.a
+%{_libdir}/openmpi*/lib/lib*.so*
 
 %files mpich
 %doc README.rst
 %license LICENSE_1_0.txt
-%{_libdir}/mpich*/lib/lib*.so*
+%{_libdir}/mpich*/lib/lib*.so.*
 %{_libdir}/mpich*/lib/%{name}
 
 %files mpich-examples
@@ -317,6 +316,7 @@ done
 %{_libdir}/mpich*/lib/cmake/HPX
 %{_libdir}/mpich*/lib/bazel
 %{_libdir}/mpich*/lib/lib*.a
+%{_libdir}/mpich*/lib/lib*.so*
 
 %files devel
 %{_includedir}/%{name}
@@ -324,6 +324,7 @@ done
 %{_libdir}/cmake/HPX
 %{_libdir}/bazel
 %{_libdir}/lib*.a
+%{_libdir}/lib*.so*
 
 %changelog
 * Fri Nov 09 2018 Patrick Diehl <patrickdiehl@lsu.edu> - 1.2-0.1.rc1
