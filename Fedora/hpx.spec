@@ -175,6 +175,8 @@ for mpi in '' openmpi mpich ; do
   test -n "${mpi}" && module unload mpi/${mpi}-%{_arch}
 done
 
+%ldconfig_scriptlets 
+
 %files
 %doc README.rst
 %license LICENSE_1_0.txt
