@@ -207,16 +207,10 @@ for mpi in '' openmpi mpich ; do
   test -n "${mpi}" && module load mpi/${mpi}-%{_arch}
   mkdir -p ${mpi:-serial}
   pushd ${mpi:-serial}
-  if [ -n "$mpi" ]; then
-  export CC=mpicc
-  export CXX=mpicxx
-  %{cmake} -DHPX_WITH_PARCELPORT_MPI=0N -DLIB=${MPI_LIB} %{?cmake_opts:%{cmake_opts}} ..
-  else
-  export CC=gcc
-  export CXX=g++
-  %{cmake} -DLIB=%{_lib} %{?cmake_opts:%{cmake_opts}} ..
-  fi
+  test -n "${mpi}" && export CC=mpicc && export CXX=mpicxx
+  %{cmake} ${mpi:+-DHPX_WITH_PARCELPORT_MPI=0N} -DLIB=${MPI_LIB:-%{_lib}} %{?cmake_opts:%{cmake_opts}} ..
   %make_build 
+  test -n "${mpi}" && unset CC CXX
   popd
   test -n "${mpi}" && module unload mpi/${mpi}-%{_arch}
 done
