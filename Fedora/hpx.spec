@@ -326,5 +326,5 @@ done
 %{_libdir}/lib*.a
 
 %changelog
-* Fri Nov 09 2018 Patrick Diehl <patrickdiehl@lsu.edu> - 1.2-0
+* Fri Nov 09 2018 Patrick Diehl <patrickdiehl@lsu.edu> - 1.2-0.1.rc1
 - Initial Release of HPX 1.2
