@@ -287,6 +287,7 @@ done
 %license LICENSE_1_0.txt
 %{_libdir}/openmpi*/lib/lib*.so*
 %{_libdir}/openmpi*/lib/%{name}
+%{_libdir}/openmpi*/lib/lib*.a
 
 %files openmpi-examples
 %doc README.rst
@@ -305,6 +306,7 @@ done
 %license LICENSE_1_0.txt
 %{_libdir}/mpich*/lib/lib*.so*
 %{_libdir}/mpich*/lib/%{name}
+%{_libdir}/mpich*/lib/lib*.a
 
 %files mpich-examples
 %doc README.rst
