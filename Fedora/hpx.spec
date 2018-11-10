@@ -257,9 +257,7 @@ for mpi in '' openmpi mpich ; do
   test -n "${mpi}" && module unload mpi/${mpi}-%{_arch}
 done
 
-%post -p /sbin/ldconfig
-
-%postun -p /sbin/ldconfig
+%ldconfig_scriptlets libs
 
 %files
 %doc README.rst
