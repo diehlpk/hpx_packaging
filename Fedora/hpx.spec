@@ -1,7 +1,7 @@
 Name:           hpx
 Version:        1.2.0
 %global uversion 1.2.0-rc1
-Release:        0.1.rc1
+Release:        0.1.rc1%{?dist}
 Summary:        General Purpose C++ Runtime System
 License:        Boost
 URL:            http://stellar.cct.lsu.edu/tag/hpx/
