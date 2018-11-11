@@ -131,6 +131,10 @@ This package contains development headers and libraries
 %define cmake_opts -DHPX_WITH_GENERIC_CONTEXT_COROUTINES=ON
 %endif
 
+%ifarch ppc64le
+%_smp_mflags -j2
+%endif
+
 . /etc/profile.d/modules.sh
 for mpi in '' openmpi mpich ; do
   test -n "${mpi}" && module load mpi/${mpi}-%{_arch}
