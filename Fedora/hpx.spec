@@ -132,8 +132,8 @@ This package contains development headers and libraries
 %define cmake_opts -DHPX_WITH_GENERIC_CONTEXT_COROUTINES=ON
 %endif
 
-# ppc64 does not have enough memory
-%ifarch ppc64le
+# ppc64 and i686 does not have enough memory
+%ifarch ppc64le i686
 %global _smp_mflags -j1
 %endif
 
@@ -170,8 +170,6 @@ for mpi in openmpi mpich '' ; do
   test -n "${mpi}" && module unload mpi/${mpi}-%{_arch}
 done
 
-rm %{buildroot}/%{_datadir}/%{name}-*/LICENSE_1_0.txt
-rm -rf %{buildroot}/%{_datadir}/%{name}-*/docs/html/code
 %fdupes %{buildroot}%{_prefix}
 
 %check
@@ -242,6 +240,9 @@ done
 %{_libdir}/lib*.so*
 
 %changelog
+* Wed Nov 14 2018 Patrick Diehl <patrickdiehl@lsu.edu> - 1.2.0-1
+- Adapt the spec file to the new install method of HPX
+
 * Wed Nov 14 2018 Christoph Junghans <junghans@votca.org> - 1.2.0-1
 - Version bump to hpx-1.2.0
 
