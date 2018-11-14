@@ -1,14 +1,14 @@
 Name:           hpx
 Version:        1.2.0
-%global uversion 1.2.0-rc1
-Release:        0.1.rc1%{?dist}
+Release:        1%{?dist}
 Summary:        General Purpose C++ Runtime System
 License:        Boost
 URL:            http://stellar.cct.lsu.edu/tag/hpx/
-#Source0:        http://stellar.cct.lsu.edu/files/{name}_{uversion}.tar.gz
-Source0:        https://github.com/STEllAR-GROUP/%{name}/archive/%{uversion}.tar.gz#/%{name}-%{uversion}.tar.gz
-#hpx has no support for 
+Source0:        http://stellar.cct.lsu.edu/files/%{name}_%{version}.tar.gz
+#hpx has no support for
+# https://github.com/STEllAR-GROUP/hpx/issues/3511
 ExcludeArch: s390x
+# https://github.com/STEllAR-GROUP/hpx/issues/3509
 ExcludeArch: armv7hl
 
 BuildRequires:  gcc-c++ >= 4.9
@@ -124,15 +124,17 @@ Requires:   hpx-openmpi = %{version}-%{release}
 This package contains development headers and libraries
 
 %prep
-%setup -n %{name}-%{uversion} -q
+%setup -n %{name}_%{version} -q
 
 %build
+# use generic context for these archs
 %ifarch aarch64 s390x armv7hl
 %define cmake_opts -DHPX_WITH_GENERIC_CONTEXT_COROUTINES=ON
 %endif
 
+# ppc64 does not have enough memory
 %ifarch ppc64le
-%_smp_mflags -j2
+%global _smp_mflags -j1
 %endif
 
 . /etc/profile.d/modules.sh
@@ -142,7 +144,7 @@ for mpi in '' openmpi mpich ; do
   pushd ${mpi:-serial}
   test -n "${mpi}" && export CC=mpicc && export CXX=mpicxx
   %{cmake} ${mpi:+-DHPX_WITH_PARCELPORT_MPI=ON} -DLIB=${MPI_LIB:-%{_lib}} %{?cmake_opts:%{cmake_opts}} ..
-  %make_build 
+  %make_build
   test -n "${mpi}" && unset CC CXX
   popd
   test -n "${mpi}" && module unload mpi/${mpi}-%{_arch}
@@ -159,12 +161,13 @@ for mpi in openmpi mpich '' ; do
   chmod +x  %{buildroot}${MPI_LIB:-%{_libdir}}/cmake/HPX/templates/hpx{cxx,run.py}.in
   popd
   pushd %{buildroot}/%{_bindir}
-  for exe in  *; do 
+  # rename executable with too generic names
+  for exe in  *; do
     test -n '${exe##hpx*}' && mv "${exe}" "hpx_${exe}"
   done
   popd
   test -n "${mpi}" && mv %{buildroot}/%{_bindir}/* %{buildroot}/${MPI_BIN}/
-  test -n "${mpi}" && module unload mpi/${mpi}-%{_arch} 
+  test -n "${mpi}" && module unload mpi/${mpi}-%{_arch}
 done
 
 rm %{buildroot}/%{_datadir}/%{name}-*/LICENSE_1_0.txt
@@ -179,7 +182,7 @@ for mpi in '' openmpi mpich ; do
   test -n "${mpi}" && module unload mpi/${mpi}-%{_arch}
 done
 
-%ldconfig_scriptlets 
+%ldconfig_scriptlets
 
 %files
 %doc README.rst
@@ -239,5 +242,8 @@ done
 %{_libdir}/lib*.so*
 
 %changelog
+* Wed Nov 14 2018 Christoph Junghans <junghans@votca.org> - 1.2.0-1
+- Version bump to hpx-1.2.0
+
 * Fri Nov 09 2018 Patrick Diehl <patrickdiehl@lsu.edu> - 1.2-0.1.rc1
-- Initial Release of HPX 1.2
+- Initial Release of HPX 1.2_rc1
