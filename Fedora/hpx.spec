@@ -1,10 +1,11 @@
 Name:           hpx
 Version:        1.2.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        General Purpose C++ Runtime System
 License:        Boost
 URL:            http://stellar.cct.lsu.edu/tag/hpx/
 Source0:        http://stellar.cct.lsu.edu/files/%{name}_%{version}.tar.gz
+Patch0:         https://github.com/STEllAR-GROUP/hpx/pull/3551.patch
 #hpx has no support for
 # https://github.com/STEllAR-GROUP/hpx/issues/3511
 ExcludeArch: s390x
@@ -125,6 +126,7 @@ This package contains development headers and libraries
 
 %prep
 %setup -n %{name}_%{version} -q
+%patch0 -p1
 
 %build
 # use generic context for these archs
@@ -132,8 +134,8 @@ This package contains development headers and libraries
 %define cmake_opts -DHPX_WITH_GENERIC_CONTEXT_COROUTINES=ON
 %endif
 
-# ppc64 and i686 does not have enough memory
-%ifarch ppc64le i686
+# ppc64 do not have enough memory
+%ifarch ppc64le
 %global _smp_mflags -j1
 %endif
 
@@ -170,6 +172,7 @@ for mpi in openmpi mpich '' ; do
   test -n "${mpi}" && module unload mpi/${mpi}-%{_arch}
 done
 
+rm %{buildroot}/%{_datadir}/%{name}/LICENSE_1_0.txt
 %fdupes %{buildroot}%{_prefix}
 
 %check
@@ -240,8 +243,8 @@ done
 %{_libdir}/lib*.so*
 
 %changelog
-* Wed Nov 14 2018 Patrick Diehl <patrickdiehl@lsu.edu> - 1.2.0-1
-- Adapt the spec file to the new install method of HPX
+* Thu Nov 15 2018 Christoph Junghans <junghans@votca.org> - 1.2.0-2
+- Added upstream patch 3551.patch to fix build on i686
 
 * Wed Nov 14 2018 Christoph Junghans <junghans@votca.org> - 1.2.0-1
 - Version bump to hpx-1.2.0
