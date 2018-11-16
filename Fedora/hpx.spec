@@ -1,6 +1,6 @@
 Name:           hpx
 Version:        1.2.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        General Purpose C++ Runtime System
 License:        Boost
 URL:            http://stellar.cct.lsu.edu/tag/hpx/
@@ -135,7 +135,7 @@ This package contains development headers and libraries
 %endif
 
 # ppc64 do not have enough memory
-%ifarch ppc64le
+%ifarch ppc64le aarch64
 %global _smp_mflags -j1
 %endif
 
@@ -243,6 +243,9 @@ done
 %{_libdir}/lib*.so*
 
 %changelog
+* Fri Nov 16 2018 Christoph Junghans <junghans@votca.org> - 1.2.0-3
+- Disable parallel build for aarch64
+
 * Thu Nov 15 2018 Christoph Junghans <junghans@votca.org> - 1.2.0-2
 - Added upstream patch 3551.patch to fix build on i686
 
