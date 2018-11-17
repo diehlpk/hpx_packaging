@@ -16,6 +16,12 @@
 # Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
 
+# See https://github.com/STEllAR-GROUP/hpx/issues/3509
+ExcludeArch: %arm
+# See https://github.com/STEllAR-GROUP/hpx/issues/3510
+ExcludeArch: ppc64
+ExcludeArch: ppc64le
+
 %define mpi_implem openmpi2
 %ifarch ppc64
 %define mpi_implem openmpi
@@ -28,14 +34,15 @@
 %endif
 
 Name:           hpx
-Version:        1.2.0~rc1
-%define uversion 1.2.0-rc1
+Version:        1.2.0
 Release:        0
 Summary:        General Purpose C++ Runtime System
 Group:          Productivity/Networking/Other
 License:        BSL-1.0
 URL:            http://stellar.cct.lsu.edu/tag/hpx/
-Source0:        http://stellar.cct.lsu.edu/files/%{name}_%{uversion}.tar.gz
+Source0:        http://stellar.cct.lsu.edu/files/%{name}_%{version}.tar.gz
+#PATCH-FIX-UPSTREAM 3551.patch, fix build on i586, https://github.com/STEllAR-GROUP/hpx/pull/3551
+Patch0:         https://github.com/STEllAR-GROUP/hpx/pull/3551.patch
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
@@ -47,7 +54,7 @@ BuildRequires:  libboost_atomic-devel
 BuildRequires:  libboost_filesystem-devel
 BuildRequires:  libboost_program_options-devel
 BuildRequires:  libboost_regex-devel
-%ifarch aarch64 s390x
+%ifarch aarch64 s390x armv7hl ppc64
 BuildRequires:  libboost_chrono-devel
 BuildRequires:  libboost_context-devel
 BuildRequires:  libboost_thread-devel
@@ -64,16 +71,6 @@ BuildRequires:  fdupes
 %description
 HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale.
 
-The goal of HPX is to create a high quality, freely available, open source implementation of the 
-ParalleX model for conventional systems, such as classic Linux based Beowulf clusters or multi-socket
-highly parallel SMP nodes. At the same time, we want to have a very modular and well designed runtime
-system architecture which would allow us to port our implementation onto new computer system
-architectures. We want to use real world applications to drive the development of the runtime system,
-coining out required functionalities and converging onto a stable API which will provide a smooth
-migration path for developers. The API exposed by HPX is modelled after the interfaces defined by the
-C++11 ISO standard and adheres to the programming guidelines used by the Boost collection of C++
-libraries.
-
 %package devel
 Summary:    Development headers and libraries for hpx
 Group:      Development/Libraries/C and C++
@@ -81,16 +78,6 @@ Requires:   hpx = %{version}-%{release}
 
 %description devel
 HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale.
-
-The goal of HPX is to create a high quality, freely available, open source implementation of the 
-ParalleX model for conventional systems, such as classic Linux based Beowulf clusters or multi-socket
-highly parallel SMP nodes. At the same time, we want to have a very modular and well designed runtime
-system architecture which would allow us to port our implementation onto new computer system
-architectures. We want to use real world applications to drive the development of the runtime system,
-coining out required functionalities and converging onto a stable API which will provide a smooth
-migration path for developers. The API exposed by HPX is modelled after the interfaces defined by the
-C++11 ISO standard and adheres to the programming guidelines used by the Boost collection of C++
-libraries.
 
 This package contains development headers and libraries for hpx
 
@@ -101,41 +88,33 @@ Group:          System/Libraries
 %description -n libhpx1
 HPX is a general purpose C++ runtime system for parallel and distributed applications of any scale.
 
-The goal of HPX is to create a high quality, freely available, open source implementation of the 
-ParalleX model for conventional systems, such as classic Linux based Beowulf clusters or multi-socket
-highly parallel SMP nodes. At the same time, we want to have a very modular and well designed runtime
-system architecture which would allow us to port our implementation onto new computer system
-architectures. We want to use real world applications to drive the development of the runtime system,
-coining out required functionalities and converging onto a stable API which will provide a smooth
-migration path for developers. The API exposed by HPX is modelled after the interfaces defined by the
-C++11 ISO standard and adheres to the programming guidelines used by the Boost collection of C++
-libraries.
-
 This package contains libraries for the hpx package.
 
 %prep
-%setup -n %{name}-%{uversion} -q
+%setup -n %{name}_%{version} -q
+%patch0 -p1
 
 %build
-. %{_libdir}/mpi/gcc/%{mpi_implem}/bin/mpivars.sh
-%ifarch aarch64 s390x
+%ifarch aarch64 s390x armv7hl ppc64
 %define cmake_opts -DHPX_WITH_GENERIC_CONTEXT_COROUTINES=ON
 %endif
+
+. %{_libdir}/mpi/gcc/%{mpi_implem}/bin/mpivars.sh
 %{cmake} -DLIB=%{_lib} %{?cmake_opts:%{cmake_opts}}
 make # no _smp_mflags to save memory
 
 %install
 make -C build install DESTDIR=%{buildroot}
-rm %{buildroot}/%{_datadir}/%{name}-*/LICENSE_1_0.txt
-rm -rf %{buildroot}/%{_datadir}/%{name}-*/docs/html/code
+rm %{buildroot}/%{_datadir}/%{name}/LICENSE_1_0.txt
 %fdupes %{buildroot}%{_prefix}
 
 sed -i '1s@env @@' %{buildroot}/%{_bindir}/{hpx*.py,hpxcxx} %{buildroot}/%{_libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
 chmod +x %{buildroot}/%{_libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
 
-# check currently broken, re-enable in next version
-# . {_libdir}/mpi/gcc/{mpi_implem}/bin/mpivars.sh
-# LD_LIBRARY_PATH="{buildroot}/{_libdir}:${LD_LIBRARY_PATH}" make -C build tests CTEST_OUTPUT_ON_FAILURE=1
+%check
+# full testsuite takes too much memory just run tests.examples in 1.2.0
+. %{_libdir}/mpi/gcc/%{mpi_implem}/bin/mpivars.sh
+LD_LIBRARY_PATH="%{buildroot}/%{_libdir}:${LD_LIBRARY_PATH}" make -C build tests.examples
 
 %post -n libhpx1 -p /sbin/ldconfig
 %postun -n libhpx1 -p /sbin/ldconfig
@@ -162,6 +141,5 @@ chmod +x %{buildroot}/%{_libdir}/cmake/HPX/templates/hpx{cxx,run.py}.in
 %{_libdir}/pkgconfig/*.pc
 %{_libdir}/cmake/HPX
 %{_libdir}/bazel
-%{_datadir}/%{name}-*
 
 %changelog
