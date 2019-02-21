@@ -1,16 +1,11 @@
 Name:           hpx
-Version:        1.2.0
-Release:        3%{?dist}
+Version:        1.2.1
+Release:        1%{?dist}
 Summary:        General Purpose C++ Runtime System
 License:        Boost
 URL:            http://stellar.cct.lsu.edu/tag/hpx/
 Source0:        http://stellar.cct.lsu.edu/files/%{name}_%{version}.tar.gz
-Patch0:         https://github.com/STEllAR-GROUP/hpx/pull/3551.patch
-#hpx has no support for
-# https://github.com/STEllAR-GROUP/hpx/issues/3511
-ExcludeArch: s390x
-# https://github.com/STEllAR-GROUP/hpx/issues/3509
-ExcludeArch: armv7hl
+
 
 BuildRequires:  gcc-c++ >= 4.9
 BuildRequires:  gperftools-devel
@@ -18,7 +13,15 @@ BuildRequires:  boost-devel
 BuildRequires:  hwloc-devel
 BuildRequires:  cmake
 BuildRequires:  fdupes
+BuildRequires:  git
 
+%ifarch s390x
+BuildRequires:  libatomic
+Requires:       libatomic
+%endif
+
+#Add libatomic since it is not installed with gcc on Fedora
+Requires: libatomic
 
 %global hpx_desc \
 HPX is a general purpose C++ runtime system for parallel and distributed \
@@ -52,8 +55,11 @@ This package contains the examples
 
 %package devel
 Summary:    Development headers and libraries for hpx
-Group:      Development/Libraries/C and C++
 Requires:   hpx = %{version}-%{release}
+Requires:   boost-devel
+Requires:   hwloc-devel
+Requires:   gperftools-devel
+Requires:   gcc-c++
 
 %description devel
 %{hpx_desc}
@@ -83,8 +89,12 @@ This package contains the examples
 
 %package mpich-devel
 Summary:    Development headers and libraries for hpx
-Group:      Development/Libraries/C and C++
 Requires:   hpx-mpich = %{version}-%{release}
+Requires:   boost-devel
+Requires:   hwloc-devel
+Requires:   mpich-devel
+Requires:   gperftools-devel
+
 
 %description mpich-devel
 %{hpx_desc}.
@@ -96,6 +106,7 @@ This package contains development headers and libraries
 Summary:        HPX Open MPI libraries
 Requires:       openmpi
 BuildRequires:  openmpi-devel
+
 
 %description openmpi
 %{hpx_desc}
@@ -116,8 +127,11 @@ This package contains the examples
 
 %package openmpi-devel
 Summary:    Development headers and libraries for hpx
-Group:      Development/Libraries/C and C++
 Requires:   hpx-openmpi = %{version}-%{release}
+Requires:   boost-devel
+Requires:   hwloc-devel
+Requires:   openmpi-devel
+Requires:   gperftools-devel
 
 %description openmpi-devel
 %{hpx_desc}
@@ -126,17 +140,26 @@ This package contains development headers and libraries
 
 %prep
 %setup -n %{name}_%{version} -q
-%patch0 -p1
 
 %build
 # use generic context for these archs
-%ifarch aarch64 s390x armv7hl
+%ifarch aarch64 
 %define cmake_opts -DHPX_WITH_GENERIC_CONTEXT_COROUTINES=ON
 %endif
 
 # ppc64 do not have enough memory
-%ifarch ppc64le aarch64
+%ifarch ppc64le aarch64 armv7hl
 %global _smp_mflags -j1
+%endif
+
+# use a different optimization level for arm dueo to memory limitations
+%ifarch armv7hl
+%define cmake_opts -DCMAKE_CXX_FLAGS="$RPM_OPT_FLAGS -O1" -DHPX_WITH_GENERIC_CONTEXT_COROUTINES=ON
+%endif
+
+# add lib atomic for s390x
+%ifarch s390x
+%define cmake_opts -DCMAKE_SHARED_LINKER_FLAGS="$RPM_OPT_FLAGS -latomic" -DCMAKE_EXE_LINKER_FLAGS="$RPM_OPT_FLAGS -latomic"
 %endif
 
 . /etc/profile.d/modules.sh
@@ -145,7 +168,7 @@ for mpi in '' openmpi mpich ; do
   mkdir -p ${mpi:-serial}
   pushd ${mpi:-serial}
   test -n "${mpi}" && export CC=mpicc && export CXX=mpicxx
-  %{cmake} ${mpi:+-DHPX_WITH_PARCELPORT_MPI=ON} -DLIB=${MPI_LIB:-%{_lib}} %{?cmake_opts:%{cmake_opts}} ..
+  %{cmake} ${mpi:+-DHPX_WITH_PARCELPORT_MPI=ON} %{?cmake_opts:%{cmake_opts}} -DLIB_INSTALL_DIR=%_libdir/${mpi}/${mpi:+lib/} -DLIBDIR=%_libdir/${mpi}/${mpi:+lib/} -DCMAKE_INSTALL_LIBDIR=%_libdir/${mpi}/${mpi:+lib/} ..
   %make_build
   test -n "${mpi}" && unset CC CXX
   popd
@@ -159,8 +182,7 @@ for mpi in openmpi mpich '' ; do
   test -n "${mpi}" && module load mpi/${mpi}-%{_arch} && mkdir -p %{buildroot}/${MPI_BIN}
   pushd ${mpi:-serial}
   %make_install
-  sed -i '1s@env python@python2@' %{buildroot}/%{_bindir}/{hpx*.py,hpxcxx}  %{buildroot}${MPI_LIB:-%{_libdir}}/cmake/HPX/templates/hpx{cxx,run.py}.in
-  chmod +x  %{buildroot}${MPI_LIB:-%{_libdir}}/cmake/HPX/templates/hpx{cxx,run.py}.in
+  sed -i '1s@env python@python3@' %{buildroot}/%{_bindir}/{hpx*.py,hpxcxx} 
   popd
   pushd %{buildroot}/%{_bindir}
   # rename executable with too generic names
@@ -168,7 +190,7 @@ for mpi in openmpi mpich '' ; do
     test -n '${exe##hpx*}' && mv "${exe}" "hpx_${exe}"
   done
   popd
-  test -n "${mpi}" && mv %{buildroot}/%{_bindir}/* %{buildroot}/${MPI_BIN}/
+  test -n "${mpi}" && mv %{buildroot}/%{_bindir}/* %{buildroot}/${MPI_BIN}/            
   test -n "${mpi}" && module unload mpi/${mpi}-%{_arch}
 done
 
@@ -243,6 +265,19 @@ done
 %{_libdir}/lib*.so*
 
 %changelog
+* Fri Feb 01 2019 Patrick Diehl <patrickdiehl@lsu.edu>  - 1.2.1-1
+- HPX 1.2.1 for bulding with boost 1.69 
+- Add s390x package
+
+* Fri Feb 01 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.2.0-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
+
+* Sun Dec 16 2018 Christoph Junghans <junghans@votca.org> - 1.2.0-5
+- added 3591.patch to fix build on armv7hlv
+
+* Thu Nov 22 2018 Christoph Junghans <junghans@votca.org> - 1.2.0-4
+- use python3 for scripts
+
 * Fri Nov 16 2018 Christoph Junghans <junghans@votca.org> - 1.2.0-3
 - Disable parallel build for aarch64
 
